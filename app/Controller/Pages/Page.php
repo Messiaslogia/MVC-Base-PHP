@@ -19,12 +19,13 @@
          * @return string
          */
         private static function getFooter(){
-            return View::render('pages/footer');
+            return View::render('pages/footer', [
+                'teste'=> 'Teste de Footer'
+            ]);
         }
 
         /**
-         * Método responsável  por retornar o conteúdo (view) da nossa  
-         *
+         * Método responsável  por retornar o conteúdo (view) da página
          * @param string $title
          * @param string $content
          * @return string

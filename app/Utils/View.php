@@ -34,7 +34,6 @@ class View{
         },$keys);
 
 
-
         //Retorna o conteudo renderizado 
         return str_replace($keys, array_values($vars), $contentView);
 

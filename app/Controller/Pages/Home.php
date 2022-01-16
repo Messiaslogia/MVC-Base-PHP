@@ -13,12 +13,10 @@
 
             //view da Home
             $content = View::render('\pages\home',[
-                'name' => $obOrganization->name,
-                'description' => $obOrganization->descript,
-                'site' => $obOrganization->site
+                'name' => $obOrganization->name
             ]);
             
             //Retorna a view da Page
-            return parent::getPage('MVC do Messias', $content);
+            return parent::getPage('Home - MVC do Messias', $content);
         }
     }

@@ -4,7 +4,8 @@ namespace App\Http;
 
 
 use \Closure;
-use Exception;
+use \Exception;
+use \ReflectionFunction;
 
 class Router{
     
@@ -42,8 +43,7 @@ class Router{
      *
      * @param string $url
      */
-    public function __construct($url)
-    {
+    public function __construct($url){
         $this->request = new Request();
         $this->url = $url;
         $this->setPrefix();
@@ -54,13 +54,14 @@ class Router{
      * Método Responsável por devinir os prefixos das rotas
      *
      */
-    public function setPrefix()
-    {
+    public function setPrefix(){
         //Informações da url atual
         $parseUrl = parse_url($this->url);
         
+        
         //Define prefixo
         $this->prefix = $parseUrl['path'] ?? '';
+        
 
         
     }
@@ -72,14 +73,26 @@ class Router{
      * @param string $routes
      * @param array $params
      */
-    public function addRouter($method,$routes,$params =[])
-    {
+    public function addRouter($method,$routes,$params =[]){
+        
         //Validação dos parametros
         foreach($params as $key=>$values){
             if ($values instanceof Closure) {
                 $params['controller'] = $values;
                 unset($params[$key]); 
+                continue;
             }
+        }
+
+        //Variáveis da Rota
+        $params['variables'] = [];
+
+        //Padrão de Validação das Variaveis das Rotas
+        $patternVariables = '/{(.*?)}/';
+        if (preg_match_all($patternVariables, $routes ,$matches)) { 
+            $routes = preg_replace($patternVariables, '(.*?)', $routes);
+            $params['variables'] = $matches[1];
+            
         }
 
         //Padrao de Validação da URL
@@ -88,6 +101,7 @@ class Router{
         //Adiciona  a rota dentro da Classe
         $this->routes[$patternRoute][$method] = $params;
         
+      
     }
 
     /**
@@ -118,6 +132,7 @@ class Router{
     public function put($route,$params = []){
         return $this->addRouter('PUT',$route,$params);     
     }
+
      /**
      * Metodo responsavel por definir uma rota de DELETE
      *
@@ -161,9 +176,21 @@ class Router{
 
         foreach ($this->routes as $patternRoute => $method) {
             //Verifica se a URI bate com o padrao
-            if (preg_match($patternRoute, $uri)) {
+            if (preg_match($patternRoute, $uri, $matches)) {
                 //Verifica o Metodo
-                if ($method[$httpMethod]) {
+                if (isset($method[$httpMethod])) {
+                    
+                    
+                    //Remove a primeira posição
+                    unset($matches[0]);
+
+                    //Variaves Processadas
+                    $keys = $method[$httpMethod]['variables'];
+                    $method[$httpMethod]['variables'] = array_combine($keys, $matches);
+                    $method[$httpMethod]['variables']['request'] = $this->request;
+
+                
+            
                     
                     //Retorno dos parametros da rota
                     return $method[$httpMethod];
@@ -187,7 +214,7 @@ class Router{
         try {
             
             $route = $this->getRoute();
-            
+
             //Verifica o Controlador
             if (!isset($route['controller'])) {
                 throw new Exception("A URL não pode  ser processada", 500);
@@ -195,6 +222,15 @@ class Router{
 
             //Argumentos  da Função
             $args = [];
+
+            //Reflection
+            $reflection = new ReflectionFunction($route['controller']);
+            foreach ($reflection->getParameters() as $parameter) {
+                $name = $parameter->getName();
+                $args[$name] = $route['variables'][$name] ?? '';
+                
+            
+            }
 
             //Retorna a execução da função
             return call_user_func_array($route['controller'], $args);

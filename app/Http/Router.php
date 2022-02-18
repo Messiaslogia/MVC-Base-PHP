@@ -16,7 +16,6 @@ class Router{
      */
     private $url = '';
 
-    
     /**
      * Prefixo de todas as rotas
      *
@@ -58,11 +57,8 @@ class Router{
         //Informações da url atual
         $parseUrl = parse_url($this->url);
         
-        
         //Define prefixo
         $this->prefix = $parseUrl['path'] ?? '';
-        
-
         
     }
 
@@ -124,25 +120,26 @@ class Router{
         return $this->addRouter('POST',$route,$params);     
     }
 
-     /**
+    /**
      * Metodo responsavel por definir uma rota de PUT
      * @param string $route
      * @param array $params
-     */
+        */
+
     public function put($route,$params = []){
         return $this->addRouter('PUT',$route,$params);     
     }
 
-     /**
+    /**
      * Metodo responsavel por definir uma rota de DELETE
      *
      * @param string $route
      * @param array $params
      */
+
     public function delete($route,$params = []){
         return $this->addRouter('DELETE',$route,$params);     
     }
-
 
     /**
      * Metodo Responsavel por retornar a URI desconsiderando o prefixo 
@@ -152,12 +149,10 @@ class Router{
     public function getUri(){
         //URI do Request
         $uri=$this->request->getUri();
-         
-        
+
         //retorna a URI com o prefixo
         $xUri = strlen($this->prefix) ? explode($this->prefix,$uri): [$uri];
-        
-        
+
         //retorna a URI sem prefixo
         return end($xUri);
     }
@@ -174,13 +169,12 @@ class Router{
         //METHOD
         $httpMethod = $this->request->getHttoMethod();
 
+        //VALIDA AS ROTAS
         foreach ($this->routes as $patternRoute => $method) {
             //Verifica se a URI bate com o padrao
             if (preg_match($patternRoute, $uri, $matches)) {
                 //Verifica o Metodo
                 if (isset($method[$httpMethod])) {
-                    
-                    
                     //Remove a primeira posição
                     unset($matches[0]);
 
@@ -188,6 +182,8 @@ class Router{
                     $keys = $method[$httpMethod]['variables'];
                     $method[$httpMethod]['variables'] = array_combine($keys, $matches);
                     $method[$httpMethod]['variables']['request'] = $this->request;
+
+                  
 
                 
             
@@ -228,6 +224,8 @@ class Router{
             foreach ($reflection->getParameters() as $parameter) {
                 $name = $parameter->getName();
                 $args[$name] = $route['variables'][$name] ?? '';
+
+                
                 
             
             }

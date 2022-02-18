@@ -18,9 +18,21 @@ function(){
 } 
 ]);
 
-//Rota Dinâmica 
-$obRouter->get('/pagina/{idPagina}/{acao}',[
-    function($idPagina,$acao){
-        return new Response(200, 'Página '.$idPagina. ' - '. $acao);
+//Rota Depoimentos
+$obRouter->get('/depoimentos',[
+    function(){
+        return new Response(200, Pages\Testimony::getTestimonies());
     } 
     ]);
+
+    //Rota Depoimentos (insert)
+$obRouter->post('/depoimentos',[
+    function($request){
+        //Dados do Post
+        $postVars =  $request->getPostVars();
+        return new Response(200, Pages\Testimony::insertTestimony($request));
+    } 
+    ]);
+
+
+

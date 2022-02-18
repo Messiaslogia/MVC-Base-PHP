@@ -42,17 +42,18 @@ class View{
      */
 
     public  static function render($view, $vars = []){
+
         //Conteudo da View
         $contentView = self::getContentView($view); 
 
         $vars = array_merge(self::$vars, $vars);
 
+        
         //Chaves do Array de Variaveis
         $keys = array_keys($vars);
         $keys = array_map(function($item){
             return '{{'.$item.'}}';
         },$keys);
-
 
         //Retorna o conteudo renderizado 
         return str_replace($keys, array_values($vars), $contentView);
